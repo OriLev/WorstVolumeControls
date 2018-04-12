@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        #app {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+        }
+
+        .container {
+            flex: 1 1 auto;
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .volumeLevel {
+            flex: 1 1 auto;
+            width: 8%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <template class="checkbox">
+        <label class="volumeLevel">
+            <input type="radio" name="volumeLevel" value="{value}" /> {value}
+        </label>
+    </template>
+    <template class="app">
+        Volume Control
+        <div class="container">{app}</div>
+        <label>
+            <input type="checkbox" class="mute"> Mute
+        </label>
+    </template>
+    <script>
+        const checkboxTemplate = document.querySelector(".checkbox").innerHTML;
+        const appTemplate = document.querySelector(".app").innerHTML;
+        let checkboxes = '';
+
+        for (let i = 0; i <= 100; i++) {
+            checkboxes += checkboxTemplate.replace(/\{value\}/g, i);
+        }
+        const app = appTemplate.replace('{app}', checkboxes);
+        document.querySelector('#app').innerHTML = app;
+        document.querySelectorAll('[type="radio"]').forEach((el, index) => {
+            el.addEventListener('change', () => {
+                setVolume(index);
+            })
+        })
+        document.querySelector('.mute').addEventListener('change', ({ currentTarget }) => {
+            require('electron').ipcRenderer.send('mute', currentTarget.checked ? 1 : 0);
+        })
+        function setVolume(number) {
+            require('electron').ipcRenderer.send('message', number);
+        }
+    </script>
+</body>
+}
+</html>
